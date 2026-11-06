@@ -1,5 +1,5 @@
 import type { ExtensionAPI } from "@oh-my-pi/pi-coding-agent";
-import { createNeuralWattProvider, NEURALWATT_PROVIDER_ID } from "./neuralwatt.js";
+import { createNeuralWattProvider, NEURALWATT_PROVIDER_ID } from "./neuralwatt";
 
 export {
 	createNeuralWattProvider,
@@ -9,7 +9,7 @@ export {
 	NEURALWATT_API_KEY_URL,
 	NEURALWATT_PROVIDER_ID,
 	toProviderModelConfig,
-} from "./neuralwatt.js";
+} from "./neuralwatt";
 
 export default function neuralWattProvider(pi: ExtensionAPI): void {
 	pi.registerProvider(NEURALWATT_PROVIDER_ID, createNeuralWattProvider());
