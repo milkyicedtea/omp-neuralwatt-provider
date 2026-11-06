@@ -1,7 +1,7 @@
 import type { ProviderConfigInput, ProviderModelConfig } from "@oh-my-pi/pi-coding-agent";
 
 export const NEURALWATT_API_BASE_URL = "https://api.neuralwatt.com/v1";
-export const NEURALWATT_API_KEY_URL = "https://portal.neuralwatt.com/dashboard/api-keys";
+export const NEURALWATT_API_KEY_URL = "https://portal.neuralwatt.com/dashboard/keys";
 export const NEURALWATT_API_KEY_ENV = "NEURALWATT_API_KEY";
 export const NEURALWATT_PROVIDER_ID = "neuralwatt";
 
