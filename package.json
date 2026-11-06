@@ -1,27 +1,31 @@
 {
-  "name": "omp-neuralwatt-provider",
-  "version": "0.1.0",
-  "description": "NeuralWatt provider plugin for Oh My Pi",
-  "license": "MIT",
-  "type": "module",
-  "files": [
-    "src"
-  ],
-  "omp": {
-    "extensions": [
-      "./src/index.ts"
-    ]
-  },
-  "scripts": {
-    "test": "bun test",
-    "typecheck": "tsc --noEmit"
-  },
-  "peerDependencies": {
-    "@oh-my-pi/pi-coding-agent": "^18.16.0"
-  },
-  "devDependencies": {
-    "@oh-my-pi/pi-coding-agent": "18.16.0",
-    "@types/bun": "latest",
-    "typescript": "^5.9.3"
-  }
+	"name": "omp-neuralwatt-provider",
+	"version": "0.1.0",
+	"description": "NeuralWatt provider plugin for Oh My Pi",
+	"license": "MIT",
+	"type": "module",
+	"files": [
+		"src"
+	],
+	"omp": {
+		"extensions": [
+			"./src/index.ts"
+		]
+	},
+	"scripts": {
+		"check": "biome check --write .",
+		"fmt": "biome format --write .",
+		"lint": "biome lint .",
+		"test": "bun test",
+		"typecheck": "tsc --noEmit"
+	},
+	"peerDependencies": {
+		"@oh-my-pi/pi-coding-agent": "^18.16.0"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.6.5",
+		"@oh-my-pi/pi-coding-agent": "18.16.0",
+		"@types/bun": "latest",
+		"typescript": "^7.0.2"
+	}
 }

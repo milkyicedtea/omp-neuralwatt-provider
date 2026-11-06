@@ -5,7 +5,7 @@ First-class [NeuralWatt](https://neuralwatt.com) provider for [Oh My Pi](https:/
 ## Install
 
 ```sh
-omp install github:<owner>/omp-neuralwatt-provider#v0.1.0
+omp install github:milkyicedtea/omp-neuralwatt-provider#v0.1.0
 ```
 
 For local development:
