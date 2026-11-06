@@ -1,0 +1,27 @@
+{
+  "name": "omp-neuralwatt-provider",
+  "version": "0.1.0",
+  "description": "NeuralWatt provider plugin for Oh My Pi",
+  "license": "MIT",
+  "type": "module",
+  "files": [
+    "src"
+  ],
+  "omp": {
+    "extensions": [
+      "./src/index.ts"
+    ]
+  },
+  "scripts": {
+    "test": "bun test",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "@oh-my-pi/pi-coding-agent": "^18.16.0"
+  },
+  "devDependencies": {
+    "@oh-my-pi/pi-coding-agent": "18.16.0",
+    "@types/bun": "latest",
+    "typescript": "^5.9.3"
+  }
+}
