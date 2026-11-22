@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.0 - 2026-11-22
+
+- Add `/neuralwatt-usage [days]` for retrospective usage over a UTC date window, defaulting to 30 days and accepting 1-365.
+- Report request, input/output/cache token, cost, and energy totals from NeuralWatt's aggregated usage and energy endpoints, plus a chronological daily series with an ASCII cost bar.
+- Resolve the API key from OMP credentials before `NEURALWATT_API_KEY`, never print the key, and surface 401, 403, 429, 5xx, malformed JSON, invalid payloads, timeouts, and network failures as user-facing messages.
+- Space the two usage requests by one second and leave the built-in `/usage` quota report unchanged.
+
 ## 0.2.0 - 2026-11-22
 
 - Report NeuralWatt account quota through OMP's built-in `/usage` command and `omp usage --provider neuralwatt`, sourced from authenticated `GET /v1/quota`.

@@ -5,7 +5,7 @@ First-class [NeuralWatt](https://neuralwatt.com) provider for [Oh My Pi](https:/
 ## Install
 
 ```sh
-omp install github:milkyicedtea/omp-neuralwatt-provider#v0.2.0
+omp install github:milkyicedtea/omp-neuralwatt-provider#v0.3.0
 ```
 
 For local development:
@@ -39,7 +39,20 @@ omp models refresh neuralwatt
 - Registers only chat models. Embedding and decision models advertised through `metadata.capabilities.task` are excluded.
 - Carries catalog metadata into OMP: display name, context/output limits, vision, tools, reasoning effort levels, and per-million-token pricing.
 - Reports account quota through OMP's built-in `/usage` command (and `omp usage --provider neuralwatt`) from authenticated `GET /v1/quota`: subscription energy, daily free energy, prepaid credit balance, and per-key spending allowance.
+- Provides `/neuralwatt-usage [days]` for retrospective token, cost, and energy reporting. It reads NeuralWatt's usage summary and energy endpoints and never changes `/usage`.
 - Uses the normal OMP OpenAI Completions transport. No custom request or streaming implementation is maintained.
+
+## Retrospective usage
+
+`/neuralwatt-usage` reports what the account actually used over a UTC date window. This is separate from `/usage`, which shows live quota and allowance state.
+
+```sh
+/neuralwatt-usage       # last 30 days
+/neuralwatt-usage 7     # last 7 days
+/neuralwatt-usage 365   # maximum window
+```
+
+The report includes request and token totals, charged cost in USD, consumed and charged energy in kWh, and a per-day series with an ASCII cost bar. The command resolves the key from OMP credentials first, then `NEURALWATT_API_KEY`; it never prints the key. Requests are spaced to respect NeuralWatt's one-request-per-second limit. Invalid arguments such as `0`, `abc`, or `366` return a usage error.
 
 ## Development
 
