@@ -4,10 +4,12 @@ import { createNeuralWattProvider, NEURALWATT_PROVIDER_ID } from "./neuralwatt";
 export {
 	createNeuralWattProvider,
 	fetchNeuralWattModels,
+	fetchNeuralWattUsage,
 	NEURALWATT_API_BASE_URL,
 	NEURALWATT_API_KEY_ENV,
 	NEURALWATT_API_KEY_URL,
 	NEURALWATT_PROVIDER_ID,
+	neuralWattUsageProvider,
 	toProviderModelConfig,
 } from "./neuralwatt";
 

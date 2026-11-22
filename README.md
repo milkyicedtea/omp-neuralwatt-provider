@@ -5,7 +5,7 @@ First-class [NeuralWatt](https://neuralwatt.com) provider for [Oh My Pi](https:/
 ## Install
 
 ```sh
-omp install github:milkyicedtea/omp-neuralwatt-provider#v0.1.0
+omp install github:milkyicedtea/omp-neuralwatt-provider#v0.2.0
 ```
 
 For local development:
@@ -38,6 +38,7 @@ omp models refresh neuralwatt
 - Discovers models from authenticated `GET /v1/models` responses. A `public` catalog is rejected because it indicates that the API key was not accepted.
 - Registers only chat models. Embedding and decision models advertised through `metadata.capabilities.task` are excluded.
 - Carries catalog metadata into OMP: display name, context/output limits, vision, tools, reasoning effort levels, and per-million-token pricing.
+- Reports account quota through OMP's built-in `/usage` command (and `omp usage --provider neuralwatt`) from authenticated `GET /v1/quota`: subscription energy, daily free energy, prepaid credit balance, and per-key spending allowance.
 - Uses the normal OMP OpenAI Completions transport. No custom request or streaming implementation is maintained.
 
 ## Development
@@ -48,8 +49,12 @@ bun run typecheck
 bun test
 ```
 
-The tests cover model mapping plus the complete API-key-login callback contract with a mocked NeuralWatt catalog. A live OMP smoke test requires a real NeuralWatt key:
+The tests cover model mapping, the complete API-key-login callback contract, and quota-to-usage mapping with mocked NeuralWatt responses. A live OMP smoke test requires a real NeuralWatt key:
 
 ```sh
 omp --extension . -p --model neuralwatt/<model-id> 'Reply with only OK'
 ```
+
+## Release
+
+Update `package.json` and the matching dated section in `CHANGELOG.md`, then push a `v<version>` tag. The release workflow validates that the tag, package version, and changelog agree, runs typecheck/tests/lint, and creates a GitHub Release with the changelog body. GitHub generates the source archives; no binaries are attached.
