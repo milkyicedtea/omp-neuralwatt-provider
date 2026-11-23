@@ -5,7 +5,7 @@ First-class [NeuralWatt](https://neuralwatt.com) provider for [Oh My Pi](https:/
 ## Install
 
 ```sh
-omp install github:milkyicedtea/omp-neuralwatt-provider#v0.3.0
+omp install github:milkyicedtea/omp-neuralwatt-provider#v0.3.1
 ```
 
 For local development:
@@ -38,7 +38,7 @@ omp models refresh neuralwatt
 - Discovers models from authenticated `GET /v1/models` responses. A `public` catalog is rejected because it indicates that the API key was not accepted.
 - Registers only chat models. Embedding and decision models advertised through `metadata.capabilities.task` are excluded.
 - Carries catalog metadata into OMP: display name, context/output limits, vision, tools, reasoning effort levels, and per-million-token pricing.
-- Reports account quota through OMP's built-in `/usage` command (and `omp usage --provider neuralwatt`) from authenticated `GET /v1/quota`: subscription energy, daily free energy, prepaid credit balance, and per-key spending allowance.
+- Reports account quota through OMP's built-in `/usage` command (and `omp usage --provider neuralwatt`) from authenticated `GET /v1/quota`: subscription energy, daily free energy, prepaid credit balance, and per-key spending allowance. PAYG credits render as remaining dollars only; subscription and daily energy rows show kWh alongside the percentage remaining.
 - Provides `/neuralwatt-usage [days]` for retrospective token, cost, and energy reporting. It reads NeuralWatt's usage summary and energy endpoints and never changes `/usage`.
 - Uses the normal OMP OpenAI Completions transport. No custom request or streaming implementation is maintained.
 

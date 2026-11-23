@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.1 - 2026-11-23
+
+- Render a PAYG-only account as `$32.68 left` instead of a percentage of lifetime purchased credits. The lifetime total, percentage, and misleading allowance framing are removed; the row states that prepaid credits do not reset.
+- Put subscription and daily-free-energy electricity in the row label (`13.90/20.00 kWh`) so the compact usage card shows both the energy amount and its percentage remaining. Notes report kWh charged, kWh remaining or over, and the percentage.
+- Label the balance and energy rows as PAYG and SUB, and keep key spending allowances in dollars remaining with their percentage.
+
 ## 0.3.0 - 2026-11-22
 
 - Add `/neuralwatt-usage [days]` for retrospective usage over a UTC date window, defaulting to 30 days and accepting 1-365.

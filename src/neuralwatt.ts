@@ -92,6 +92,14 @@ function usedFraction(used: number | undefined, limit: number | undefined): numb
 	return used !== undefined && limit !== undefined && limit > 0 ? used / limit : undefined;
 }
 
+function percentLeft(fraction: number | undefined): string | undefined {
+	return fraction === undefined ? undefined : `${(Math.max(0, 1 - fraction) * 100).toFixed(1)}% left`;
+}
+
+function dollars(value: number): string {
+	return `$${value.toFixed(2)}`;
+}
+
 function usageStatus(fraction: number | undefined): UsageStatus | undefined {
 	if (fraction === undefined) return undefined;
 	if (fraction >= 1) return "exhausted";
@@ -253,21 +261,37 @@ export async function fetchNeuralWattUsage(
 	if (subscription) {
 		const included = finiteNumber(subscription.kwh_included);
 		const used = finiteNumber(subscription.kwh_used);
+		const remaining =
+			finiteNumber(subscription.kwh_remaining) ??
+			(included !== undefined && used !== undefined ? included - used : undefined);
 		const fraction = usedFraction(used, included);
 		const resetsAt = isoMillis(subscription.current_period_end);
 		const plan = typeof subscription.plan === "string" ? subscription.plan : undefined;
 		if (included !== undefined || used !== undefined) {
+			const energyText =
+				used !== undefined && included !== undefined
+					? `${used.toFixed(2)}/${included.toFixed(2)} kWh`
+					: used !== undefined
+						? `${used.toFixed(2)} kWh`
+						: `${included ? included.toFixed(2) : "?"} kWh allowance`;
+			const left = percentLeft(fraction);
+			const details: string[] = [];
+			if (used !== undefined) details.push(`${used.toFixed(2)} kWh charged`);
+			if (remaining !== undefined) {
+				details.push(
+					remaining < 0
+						? `${Math.abs(remaining).toFixed(2)} kWh over (0.0% remaining)`
+						: `${remaining.toFixed(2)} kWh remaining${left ? ` (${left})` : ""}`,
+				);
+			}
 			limits.push({
 				id: "neuralwatt:subscription:energy",
-				label: "Subscription energy",
-				scope: { provider: params.provider, windowId: "billing", ...(plan ? { tier: plan } : {}) },
+				label: `Electricity (SUB) ${energyText}`,
+				scope: { provider: params.provider, windowId: "billing", shared: true, ...(plan ? { tier: plan } : {}) },
 				window: { id: "billing", label: "billing period", ...(resetsAt !== undefined ? { resetsAt } : {}) },
 				amount: percentAmount(fraction),
 				status: usageStatus(fraction),
-				notes: [
-					`${(used ?? 0).toFixed(2)} / ${(included ?? 0).toFixed(2)} kWh charged`,
-					...(subscription.in_overage === true ? ["Account is in overage"] : []),
-				],
+				notes: [details.join(" · "), ...(subscription.in_overage === true ? ["Account is in overage"] : [])],
 			});
 		}
 	}
@@ -275,16 +299,22 @@ export async function fetchNeuralWattUsage(
 	if (daily) {
 		const included = finiteNumber(daily.kwh_included);
 		const used = finiteNumber(daily.kwh_used);
+		const remaining = finiteNumber(daily.kwh_remaining);
 		const fraction = usedFraction(used, included);
 		const resetsAt = isoMillis(daily.reset_at);
 		const labels = Array.isArray(daily.model_labels)
 			? daily.model_labels.filter((value): value is string => typeof value === "string")
 			: [];
 		if (included !== undefined && included > 0 && used !== undefined) {
+			const left = percentLeft(fraction);
+			const details = [`${used.toFixed(2)} kWh charged`];
+			if (remaining !== undefined) {
+				details.push(`${remaining.toFixed(2)} kWh remaining${left ? ` (${left})` : ""}`);
+			}
 			limits.push({
 				id: "neuralwatt:daily-free-energy",
-				label: "Daily free energy",
-				scope: { provider: params.provider, windowId: "daily" },
+				label: `Daily free energy ${used.toFixed(2)}/${included.toFixed(2)} kWh`,
+				scope: { provider: params.provider, windowId: "daily", shared: true },
 				window: {
 					id: "daily",
 					label: "daily",
@@ -293,30 +323,21 @@ export async function fetchNeuralWattUsage(
 				},
 				amount: percentAmount(fraction),
 				status: usageStatus(fraction),
-				notes: [
-					`${used.toFixed(2)} / ${included.toFixed(2)} kWh charged`,
-					...(labels.length > 0 ? [`Covers ${labels.join(", ")}`] : []),
-				],
+				notes: [details.join(" · "), ...(labels.length > 0 ? [`Covers ${labels.join(", ")}`] : [])],
 			});
 		}
 	}
 
 	if (balance) {
 		const remaining = finiteNumber(balance.credits_remaining_usd);
-		const total = finiteNumber(balance.total_credits_usd);
-		const used =
-			finiteNumber(balance.credits_used_usd) ??
-			(total !== undefined && remaining !== undefined ? total - remaining : undefined);
-		const method = typeof balance.accounting_method === "string" ? balance.accounting_method : undefined;
-		if ((total !== undefined && total > 0) || remaining !== undefined) {
-			const fraction = usedFraction(used, total);
+		if (remaining !== undefined) {
 			limits.push({
 				id: "neuralwatt:prepaid:usd",
-				label: "Prepaid credit balance",
-				scope: { provider: params.provider },
-				amount: usdAmount(used, total, remaining),
-				status: usageStatus(fraction),
-				notes: ["Does not reset; top up to refill", ...(method ? [`Accounting: ${method}`] : [])],
+				label: "Prepaid credits (PAYG)",
+				scope: { provider: params.provider, shared: true },
+				amount: { remaining, unit: "usd" },
+				status: remaining > 0 ? "ok" : "exhausted",
+				notes: ["Does not reset; top up to refill"],
 			});
 		}
 	}
@@ -329,14 +350,27 @@ export async function fetchNeuralWattUsage(
 		const durationMs =
 			period === "daily" ? DAY_MS : period === "weekly" ? WEEK_MS : period === "monthly" ? 30 * DAY_MS : undefined;
 		if (limitUsd !== undefined && limitUsd > 0) {
+			const fraction = usedFraction(spentUsd, limitUsd);
+			const details: string[] = [];
+			if (remainingUsd !== undefined) {
+				details.push(`${dollars(remainingUsd)} remaining of ${dollars(limitUsd)}`);
+			} else if (spentUsd !== undefined) {
+				details.push(`${dollars(spentUsd)} spent of ${dollars(limitUsd)}`);
+			}
+			const left = percentLeft(fraction);
+			if (left) details.push(left);
+			details.push("NeuralWatt does not report the reset date");
 			limits.push({
 				id: `neuralwatt:key-allowance:${period}`,
-				label: "Key allowance",
+				label: `Key allowance (${period})`,
 				scope: { provider: params.provider, windowId: period },
 				window: { id: period, label: period, ...(durationMs !== undefined ? { durationMs } : {}) },
 				amount: usdAmount(spentUsd, limitUsd, remainingUsd),
-				status: allowance.blocked === true ? "exhausted" : usageStatus(usedFraction(spentUsd, limitUsd)),
-				...(allowance.blocked === true ? { notes: ["This key is blocked at its spending limit"] } : {}),
+				status: allowance.blocked === true ? "exhausted" : usageStatus(fraction),
+				notes: [
+					details.join(" · "),
+					...(allowance.blocked === true ? ["This key is blocked at its spending limit"] : []),
+				],
 			});
 		}
 	}

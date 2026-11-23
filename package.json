@@ -1,6 +1,6 @@
 {
 	"name": "omp-neuralwatt-provider",
-	"version": "0.3.0",
+	"version": "0.3.1",
 	"description": "NeuralWatt provider plugin for Oh My Pi",
 	"license": "MIT",
 	"type": "module",

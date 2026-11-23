@@ -188,10 +188,26 @@ describe("NeuralWatt usage reporting", () => {
 			"neuralwatt:key-allowance:monthly",
 		]);
 		expect(report?.limits.map((limit) => limit.status)).toEqual(["ok", "ok", "ok", "ok"]);
+		expect(report?.limits.map((limit) => limit.label)).toEqual([
+			"Electricity (SUB) 13.90/20.00 kWh",
+			"Daily free energy 0.04/0.15 kWh",
+			"Prepaid credits (PAYG)",
+			"Key allowance (monthly)",
+		]);
 		expect(report?.limits[0]?.amount.usedFraction).toBeCloseTo(13.9023 / 20);
 		expect(report?.limits[0]?.window?.resetsAt).toBe(Date.parse("2026-05-11T05:05:25Z"));
+		expect(report?.limits[0]?.notes).toEqual(["13.90 kWh charged · 6.10 kWh remaining (30.5% left)"]);
 		expect(report?.limits[1]?.window?.resetsAt).toBe(Date.parse("2026-04-17T00:00:00Z"));
+		expect(report?.limits[1]?.notes).toEqual([
+			"0.04 kWh charged · 0.11 kWh remaining (71.9% left)",
+			"Covers DeepSeek-V4-Flash",
+		]);
+		expect(report?.limits[2]?.amount).toEqual({ remaining: 32.6774, unit: "usd" });
+		expect(report?.limits[2]?.notes).toEqual(["Does not reset; top up to refill"]);
 		expect(report?.limits[3]?.amount).toMatchObject({ used: 4, limit: 10, remaining: 6, unit: "usd" });
+		expect(report?.limits[3]?.notes).toEqual([
+			"$6.00 remaining of $10.00 · 60.0% left · NeuralWatt does not report the reset date",
+		]);
 		expect(report?.metadata).toMatchObject({ accountId: "my-production-key", plan: "standard" });
 		expect(report?.notes).toEqual(["Current month: $160.15 across 23902 requests"]);
 		expect(report?.raw).toEqual(quotaFixture);
@@ -229,8 +245,17 @@ describe("NeuralWatt usage reporting", () => {
 			["neuralwatt:prepaid:usd", "exhausted"],
 			["neuralwatt:key-allowance:daily", "exhausted"],
 		]);
-		expect(report?.limits[0]?.notes).toEqual(["12.00 / 10.00 kWh charged", "Account is in overage"]);
-		expect(report?.limits[2]?.notes).toEqual(["This key is blocked at its spending limit"]);
+		expect(report?.limits[0]?.label).toBe("Electricity (SUB) 12.00/10.00 kWh");
+		expect(report?.limits[0]?.notes).toEqual([
+			"12.00 kWh charged · 2.00 kWh over (0.0% remaining)",
+			"Account is in overage",
+		]);
+		expect(report?.limits[1]?.amount).toEqual({ remaining: 0, unit: "usd" });
+		expect(report?.limits[1]?.notes).toEqual(["Does not reset; top up to refill"]);
+		expect(report?.limits[2]?.notes).toEqual([
+			"$0.00 remaining of $5.00 · 0.0% left · NeuralWatt does not report the reset date",
+			"This key is blocked at its spending limit",
+		]);
 		expect(report?.metadata).not.toHaveProperty("accountId");
 	});
 
